@@ -10,14 +10,17 @@ class ResourceHandler():
 
     def __call__(self, resource):
         news_url_list = self.parse_top(resource)
+        if not news_url_list:
+            return []
         news_content_list = self.parse_bottom(resource, news_url_list)
         return news_content_list
 
     def get_page(self, url):
-        page = requests.get(url)
+        try:
+            page = requests.get(url)
+        except requests.exceptions.ConnectionError:
+            return '!download_error'
         if page.status_code != 200:
-            # raise Exception(f'страница не загрузилась: {page.status_code}'
-            #    f'ссылка: {url}')
             return '!download_error'
         page_as_soup_obj = BeautifulSoup(page.text, 'html.parser')
         return page_as_soup_obj
@@ -42,6 +45,9 @@ class ResourceHandler():
     def parse_top(self, resource):
         news_url_list = []
         main_page = self.get_page(resource.resource_url)
+        if main_page == '!download_error':
+            ResourceHandler.not_downloaded.append(resource.resource_url)
+            return
         news_list = self.get_elements(main_page, resource.top_tag)
         for news in news_list:
             if 'href' in news.attrs:
@@ -71,6 +77,6 @@ class ResourceHandler():
                 resource.date_cut
             )
             news_item.s_date = int(time.time())
-            news_content_list.append(news_item)
+            news_content_list.append(news_item.formated_for_db())
 
         return news_content_list

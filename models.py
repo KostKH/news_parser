@@ -3,34 +3,24 @@ import json
 class ResourceModel():
     """Класс для обмена данными с таблицей БД resourse"""
 
-    resource_id = 'Enter resource id',
-    resource_name = 'Enter resource_name'
-    resource_url = 'Enter resource_url'
-    top_tag = 'Enter top_tag'
-    bottom_tag = 'Enter bottom_tag'
-    title_cut = 'Enter title_cut'
-    date_cut = 'Enter date_cut'
-    count = 0
-    
     def __init__(
         self,
-        resource_name,
-        resource_url,
-        top_tag,
-        bottom_tag,
-        title_cut,
-        date_cut,
+        resource_id=None,
+        resource_name=None,
+        resource_url=None,
+        top_tag=None,
+        bottom_tag=None,
+        title_cut=None,
+        date_cut=None,
     ):
-        ResourceModel.count +=1
-        self.resource_id = ResourceModel.count
+        self.resource_id = resource_id
         self.resource_name = resource_name
         self.resource_url = resource_url
-        self.top_tag = top_tag
-        self.bottom_tag = bottom_tag
-        self.title_cut = title_cut
-        self.date_cut = date_cut
+        self.top_tag = json.loads(top_tag)
+        self.bottom_tag = json.loads(bottom_tag)
+        self.title_cut = json.loads(title_cut)
+        self.date_cut = json.loads(date_cut)
     
-
     def __str__(self):
         return '\n'.join(
             [
@@ -50,28 +40,18 @@ class ResourceModel():
 class ItemModel():
     """Класс для обмена данными с таблицей БД items"""
 
-    id = 'Enter id'
-    res_id = 'Enter res_id'
-    link = 'Enter link'
-    title = 'Enter title'
-    content = 'Enter content'
-    nd_date = 'Enter nd_date'
-    s_date = 'Enter s_date'
-    not_date = 'Enter not_date'
-    count = 0
-
     def __init__(
         self,
-        res_id,
-        link,
+        id=None,
+        res_id=None,
+        link=None,
         title=None,
         content=None,
         nd_date=None,
         s_date=None,
         not_date=None,
     ):
-        ItemModel.count += 1
-        self.id = ItemModel.count
+        self.id = id
         self.res_id = res_id
         self.link = link
         self.title = title
@@ -87,9 +67,20 @@ class ItemModel():
                 str(self.res_id),
                 str(self.link),
                 str(self.title),
-                str(self.content),
                 str(self.nd_date),
                 str(self.s_date),
                 str(self.not_date)
             ]
         )
+
+    def formated_for_db(self):
+        data = {
+            'res_id':int(self.res_id),
+            'link':str(self.link),
+            'title':str(self.title),
+            'content':str(self.content),
+            'nd_date':int(self.nd_date),
+            's_date':int(self.s_date),
+            'not_date':str(self.not_date),
+        }
+        return data
