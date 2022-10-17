@@ -36,7 +36,6 @@ class ResourceModel():
         )
 
 
-
 class ItemModel():
     """Класс для обмена данными с таблицей БД items"""
 
@@ -63,13 +62,13 @@ class ItemModel():
     def __str__(self):
         return '\n'.join(
             [
-                str(self.id),
-                str(self.res_id),
-                str(self.link),
-                str(self.title),
-                str(self.nd_date),
-                str(self.s_date),
-                str(self.not_date)
+                f'id: {str(self.id)}',
+                f'res_id: {str(self.res_id)}',
+                f'link: {str(self.link)}',
+                f'title: {str(self.title)}',
+                f'nd_date: {str(self.nd_date)}',
+                f's_date: {str(self.s_date)}',
+                f'not_date: {str(self.not_date)}'
             ]
         )
 

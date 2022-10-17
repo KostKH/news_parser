@@ -131,4 +131,6 @@ dmypy.json
 #supplementary files
 _analisis/
 
+#ifrastructure
+infra/
 
