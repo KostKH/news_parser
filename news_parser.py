@@ -6,8 +6,10 @@ import logging
 import os
 import json
 from database import (establish_db_connection, get_parsed_item_added, 
-                      get_resource_list, get_resource_added)
+                      get_resource_list, get_resource_added,
+                      get_resource_deleted)
 import sys
+import messages
 
 
 def parse_items():
@@ -20,15 +22,34 @@ def parse_items():
         items_list = handler(resource)
         all_found_items += items_list
     
+    saving_stats = {
+        'updated': [],
+        'created': [],
+        'failed': []
+    }
     for item in all_found_items:
-        get_parsed_item_added(engine, items_table, item)
+        result = get_parsed_item_added(engine, items_table, item)
+        saving_stats[result].append(item)
+    
+    result_text = messages.get_parse_stats_msg(
+        resource_list,
+        all_found_items,
+        saving_stats,
+        ResourceHandler,
+    )
+    print(result_text)
+    print(
+        '\nВы также можете посмотреть результаты загрузки новостей из '
+        'ресурсов в файле "parse_result.txt". В файле сохранена '
+        'приведенная выше статистика, а также сами загруженные новости.'
+    )
     with open('parse_result.txt', 'w') as result_file:
+        result_file.write(result_text)
+        result_file.write('\nЗагруженные новости:\n')
         for item in all_found_items:
+            result_file.write('-----------------------\n')
             result_file.write(f'{str(item)}\n')
-        result_file.write(f'загружено новостей:\n{len(all_found_items)}')
-        result_file.write(f'не удалось загрузить:\n{len(ResourceHandler.not_downloaded)}')
-        result_file.write("\n".join(ResourceHandler.not_downloaded))
-    pass
+
 
 def add_resources(data):
     """action: --add-resources-list"""
@@ -47,21 +68,27 @@ def add_resources(data):
             serialized_resource
         )
         results[result].append(resource['RESOURCE_NAME'])
-    
-    print(
-        f'Найдено ресурсов во входящих параметрах: {len(data)}\n'
-        f'Добавлено новых ресурсов: {len(results["created"])}\n'
-        f'Обновлено существовавших ресурсов: {len(results["updated"])}\n'
-        f'Не удалась загрузка ресурсов: {len(results["failed to create"])}\n'
-        f'\nСписок обновленных ресурсов: {results["updated"]}\n'
-        f'\nЧто не удалось загрузить: {results["failed to create"]}\n'
-    )
+    result_text = messages.get_add_resource_stats_msg(data,results)
+    print(result_text)
 
 
 def delete_resources(data):
     """action: --delete-resources"""
+
     engine, resource_table, items_table = establish_db_connection()
-    pass
+    results = {
+        'deleted': [],
+        'not_found': []
+    }
+    for resource_id in data:
+        result = get_resource_deleted(
+            engine,
+            resource_table,
+            int(resource_id)
+        )
+        results[result].append(resource_id)
+    result_text = messages.get_del_resource_stats_msg(data,results)
+    print(result_text)
 
 def list_resources():
     """action: --list-resources"""

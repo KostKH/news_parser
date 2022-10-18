@@ -7,6 +7,7 @@ import dateparser
 class ResourceHandler():
 
     not_downloaded = []
+    failed_resources = []
 
     def __call__(self, resource):
         news_url_list = self.parse_top(resource)
@@ -46,7 +47,7 @@ class ResourceHandler():
         news_url_list = []
         main_page = self.get_page(resource.resource_url)
         if main_page == '!download_error':
-            ResourceHandler.not_downloaded.append(resource.resource_url)
+            ResourceHandler.failed_resources.append(resource.resource_url)
             return
         news_list = self.get_elements(main_page, resource.top_tag)
         for news in news_list:

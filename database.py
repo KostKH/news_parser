@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 import json
 from sqlalchemy import MetaData
 from sqlalchemy import Table, Column, Integer, String, ForeignKey
-from sqlalchemy import insert, select, update
+from sqlalchemy import insert, select, update, delete
 import os
 from models import ResourceModel
 
@@ -106,4 +106,21 @@ def get_parsed_item_added(engine, items_table, item):
             status = 'created'
         conn.commit()
     return status
-        
+
+
+def get_resource_deleted(engine, resource_table, resource_id):
+    with engine.connect() as conn:
+        existing_obj = conn.execute(
+            select(resource_table.c.RESOURCE_ID)
+            .where(resource_table.c.RESOURCE_ID == resource_id)
+        ).first()
+        if existing_obj:
+            conn.execute(
+                delete(resource_table)
+                .where(resource_table.c.RESOURCE_ID == existing_obj[0])
+            )
+            status = 'deleted'
+        else:
+            status = 'not_found'
+        conn.commit()
+    return status        
