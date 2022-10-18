@@ -1,0 +1,16 @@
+version: '3.3'
+
+services:
+
+  db_parser:
+    image: postgres:14.0-alpine
+    env_file:
+      - ./.env
+
+  parser:
+    build: ../news_parser/
+    restart: always
+    depends_on:
+      - db_parser
+    env_file:
+      - ./.env
