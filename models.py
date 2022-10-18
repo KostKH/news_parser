@@ -5,22 +5,45 @@ class ResourceModel():
 
     def __init__(
         self,
-        resource_id=None,
-        resource_name=None,
-        resource_url=None,
+        RESOURCE_ID=None,
+        RESOURCE_NAME=None,
+        RESOURCE_URL=None,
         top_tag=None,
         bottom_tag=None,
         title_cut=None,
         date_cut=None,
     ):
-        self.resource_id = resource_id
-        self.resource_name = resource_name
-        self.resource_url = resource_url
-        self.top_tag = json.loads(top_tag)
-        self.bottom_tag = json.loads(bottom_tag)
-        self.title_cut = json.loads(title_cut)
-        self.date_cut = json.loads(date_cut)
+        self.resource_id = RESOURCE_ID
+        self.resource_name = RESOURCE_NAME
+        self.resource_url = RESOURCE_URL
+        self.top_tag = json.loads(top_tag) if isinstance(
+            top_tag,
+            str
+        ) else top_tag
+        self.bottom_tag = json.loads(bottom_tag) if isinstance(
+            bottom_tag,
+            str
+        ) else bottom_tag
+        self.title_cut = json.loads(title_cut) if isinstance(
+            title_cut,
+            str
+        ) else title_cut
+        self.date_cut = json.loads(date_cut) if isinstance(
+            date_cut,
+            str
+        ) else date_cut
     
+    def formated_for_db(self):
+        data = {
+            'RESOURCE_NAME': str(self.resource_name),
+            'RESOURCE_URL': str(self.resource_url),
+            'top_tag': json.dumps(self.top_tag),
+            'bottom_tag': json.dumps(self.bottom_tag),
+            'title_cut': json.dumps(self.title_cut),
+            'date_cut': json.dumps(self.date_cut),
+        }
+        return data
+
     def __str__(self):
         return '\n'.join(
             [

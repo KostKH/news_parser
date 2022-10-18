@@ -7,7 +7,7 @@ import os
 from models import ResourceModel
 
 
-def establish_db_connection(self)
+def establish_db_connection():
     user = os.getenv('POSTGRES_USER')
     password = os.getenv('POSTGRES_PASSWORD')
     host = os.getenv('DB_HOST')

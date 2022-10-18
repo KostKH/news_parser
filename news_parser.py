@@ -1,36 +1,14 @@
-from models import ItemModel, ResourceModel
+from models import ResourceModel
 from parse_handler import ResourceHandler
 from dotenv import load_dotenv
+from arg_handler import parse_arguments
 import logging
 import os
 import json
-from sqlalchemy import MetaData
-from sqlalchemy import Table, Column, Integer, String, ForeignKey
-from sqlalchemy import insert, select, update
 from database import (establish_db_connection, get_parsed_item_added, 
                       get_resource_list, get_resource_added)
 import sys
 
-def load_test_data():
-    data = [
-        {
-            'RESOURCE_NAME': 'nur.kz',
-            'RESOURCE_URL': 'https://www.nur.kz',
-            'top_tag': json.dumps(['a', {'class': 'post-preview-text js-article-link'}]),
-            'bottom_tag': json.dumps(['div', {'class': 'formatted-body io-article-body'}]),
-            'title_cut': json.dumps(['h1', {'class': 'main-headline js-main-headline'}]),
-            'date_cut': json.dumps(['time', {'class': 'datetime datetime--publication'}]),
-        },
-        {
-            'RESOURCE_NAME': 'scientificrussia.ru/news',
-            'RESOURCE_URL': 'https://scientificrussia.ru/news/',
-            'top_tag': json.dumps(['a', {'class': 'post-preview-text js-article-link'}]),
-            'bottom_tag': json.dumps(['div', {'class': 'formatted-body io-article-body'}]),
-            'title_cut': json.dumps(['h1', {'class': 'main-headline js-main-headline'}]),
-            'date_cut': json.dumps(['time', {'class': 'datetime datetime--publication'}]),
-        },
-    ]
-    return data
 
 def parse_items():
     """action: --parse"""
@@ -43,7 +21,7 @@ def parse_items():
         all_found_items += items_list
     
     for item in all_found_items:
-        get_parsed_item_added()
+        get_parsed_item_added(engine, items_table, item)
     with open('parse_result.txt', 'w') as result_file:
         for item in all_found_items:
             result_file.write(f'{str(item)}\n')
@@ -55,14 +33,6 @@ def parse_items():
 def add_resources(data):
     """action: --add-resources-list"""
 
-    if not isinstance(data, list):
-        print(
-            'Загрузка не удалась. Проверьте, что в параметрах вы передаете '
-            'список ресурсов на загрузку в БД, а данные по каждому ресурсу '
-            'представлены в виде словаря'
-        )
-        return
-
     engine, resource_table, items_table = establish_db_connection()
     results = {
         'updated': [],
@@ -70,7 +40,12 @@ def add_resources(data):
         'failed to create': []
     }
     for resource in data:
-        result = get_resource_added(engine, resource_table, resource)
+        serialized_resource = ResourceModel(**resource).formated_for_db()
+        result = get_resource_added(
+            engine,
+            resource_table,
+            serialized_resource
+        )
         results[result].append(resource['RESOURCE_NAME'])
     
     print(
@@ -78,8 +53,8 @@ def add_resources(data):
         f'Добавлено новых ресурсов: {len(results["created"])}\n'
         f'Обновлено существовавших ресурсов: {len(results["updated"])}\n'
         f'Не удалась загрузка ресурсов: {len(results["failed to create"])}\n'
-        f'список обновленных ресурсов: {results["updated"]}\n\n'
-        f'Что не удалось загрузить: {results["failed to create"]}\n'
+        f'\nСписок обновленных ресурсов: {results["updated"]}\n'
+        f'\nЧто не удалось загрузить: {results["failed to create"]}\n'
     )
 
 
@@ -88,7 +63,7 @@ def delete_resources(data):
     engine, resource_table, items_table = establish_db_connection()
     pass
 
-def list_resources()
+def list_resources():
     """action: --list-resources"""
     engine, resource_table, items_table = establish_db_connection()
     resources = get_resource_list(engine, resource_table)
@@ -96,18 +71,53 @@ def list_resources()
         print(resource, end="\n-----------------------------\n\n")
 
 
+def get_data_from_file(input_file):
+    try:
+        with open(input_file, 'r') as file:
+            raw_data = file.read()
+            data = json.loads(raw_data)
+    except FileNotFoundError as e:
+        print(str(e))
+        sys.exit(1)
+    except json.decoder.JSONDecodeError as e:
+        print(
+            "Error: couldn't retrieve list of resources from file. "
+            " Please, ensure your file contains data in recommended format"
+        )
+        sys.exit(1)
+    if not isinstance(data, list):
+        print(
+            "Error: couldn't retrieve list of resources from file. "
+            " Please, ensure your file contains data in recommended format"
+        )
+        sys.exit(1)
+    return data
+
 def main():
     load_dotenv()
     
     logfile = os.getenv('LOGFILE')
 
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.ERROR,
         filename=logfile, 
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    
-    data = load_test_data()
+    parser, arguments = parse_arguments()
+
+    if arguments.delete_resources:
+        data = get_data_from_file(arguments.delete_resources)
+        delete_resources(data)
+    elif arguments.add_resources:
+        data = get_data_from_file(arguments.add_resources)
+        add_resources(data)
+    elif arguments.list_resources:
+        list_resources()
+    elif arguments.parse:
+        parse_items()
+    else:
+        parser.print_help()
+
 
 if __name__ == '__main__':
     main()
