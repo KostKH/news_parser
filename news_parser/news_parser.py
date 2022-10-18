@@ -97,8 +97,10 @@ def list_resources():
     """action: --list-resources"""
     engine, resource_table, items_table = establish_db_connection()
     resources = get_resource_list(engine, resource_table)
-    for resource in resources:
-        print(resource, end="\n-----------------------------\n\n")
+    if resources:
+        for resource in resources:
+            print(resource, end="\n-----------------------------\n\n")
+    print(f'Всего найдено ресурсов в БД: {len(resources)}')
 
 
 def get_data_from_file(input_file):
