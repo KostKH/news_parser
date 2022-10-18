@@ -1,5 +1,6 @@
 import json
 
+
 class ResourceModel():
     """Класс для обмена данными с таблицей БД resourse"""
 
@@ -32,7 +33,7 @@ class ResourceModel():
             date_cut,
             str
         ) else date_cut
-    
+
     def formated_for_db(self):
         data = {
             'RESOURCE_NAME': str(self.resource_name),
@@ -81,7 +82,7 @@ class ItemModel():
         self.nd_date = nd_date
         self.s_date = s_date
         self.not_date = not_date
-    
+
     def __str__(self):
         return '\n'.join(
             [
@@ -97,12 +98,12 @@ class ItemModel():
 
     def formated_for_db(self):
         data = {
-            'res_id':int(self.res_id),
-            'link':str(self.link),
-            'title':str(self.title),
-            'content':str(self.content),
-            'nd_date':int(self.nd_date),
-            's_date':int(self.s_date),
-            'not_date':str(self.not_date),
+            'res_id': int(self.res_id),
+            'link': str(self.link),
+            'title': str(self.title),
+            'content': str(self.content),
+            'nd_date': int(self.nd_date),
+            's_date': int(self.s_date),
+            'not_date': str(self.not_date),
         }
         return data

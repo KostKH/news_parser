@@ -1,9 +1,8 @@
-from sqlalchemy import create_engine
-import json
-from sqlalchemy import MetaData
-from sqlalchemy import Table, Column, Integer, String, ForeignKey
-from sqlalchemy import insert, select, update, delete
 import os
+
+from sqlalchemy import (Column, ForeignKey, Integer, MetaData, String, Table,
+                        create_engine, delete, insert, select, update)
+
 from models import ResourceModel
 
 
@@ -66,6 +65,7 @@ def get_resource_added(engine, resource_table, data):
         conn.commit()
     return status
 
+
 def get_resource_list(engine, resource_table):
     with engine.connect() as conn:
         db_rows = conn.execute(
@@ -79,13 +79,14 @@ def get_resource_list(engine, resource_table):
                 resource_table.c.date_cut
             )
         ).all()
-    
+
     resource_list = []
     for row in db_rows:
         resource = ResourceModel(*row)
         resource_list.append(resource)
 
     return resource_list
+
 
 def get_parsed_item_added(engine, items_table, item):
     with engine.connect() as conn:
@@ -123,4 +124,4 @@ def get_resource_deleted(engine, resource_table, resource_id):
         else:
             status = 'not_found'
         conn.commit()
-    return status        
+    return status

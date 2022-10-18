@@ -2,28 +2,27 @@ def get_parse_stats_msg(
     resource_list,
     all_found_items,
     saving_stats,
-    ResourceHandler
+    resource_handler
 ):
-    failed_res_number = len(ResourceHandler.failed_resources)
+    failed_res_number = len(resource_handler.failed_resources)
     handled_res_number = len(resource_list) - failed_res_number
     parse_info = [
         f'\nНайдено ресурсов в базе на парсинг: {len(resource_list)}',
         f'Обработано ресурсов: {str(handled_res_number)}',
         f'Не удалось обработать: {str(failed_res_number)}',
-        f'\nЧто именно не было обработано:',
-        '\n'.join(ResourceHandler.failed_resources),
-       '\nВ части обработанных ресурсов:',
+        '\nЧто именно не было обработано:',
+        '\n'.join(resource_handler.failed_resources),
+        '\nВ части обработанных ресурсов:',
         f'Загружено новостей: {len(all_found_items)}',
-        f'Не удалось загрузить: {len(ResourceHandler.not_downloaded)}',
+        f'Не удалось загрузить: {len(resource_handler.not_downloaded)}',
         '\nЧто именно не было загружено:',
-        '\n'.join(ResourceHandler.not_downloaded),
+        '\n'.join(resource_handler.not_downloaded),
         '\nИз загруженных новостей:',
         f'Сохранена в БД как новая новость: {len(saving_stats["created"])}',
         f'Новость найдена в базе, обновлена: {len(saving_stats["updated"])}',
         f'Не удалось сохранить в БД: {len(saving_stats["failed"])}',
     ]
-    result_text = '\n'.join(parse_info)
-    return result_text
+    return '\n'.join(parse_info)
 
 
 def get_add_resource_stats_msg(data, results):
@@ -35,8 +34,7 @@ def get_add_resource_stats_msg(data, results):
         f'\nСписок обновленных ресурсов:\n {results["updated"]}',
         f'\nЧто не удалось загрузить:\n {results["failed to create"]}'
     ]
-    result_text = '\n'.join(addition_info)
-    return result_text
+    return '\n'.join(addition_info)
 
 
 def get_del_resource_stats_msg(data, results):
@@ -46,5 +44,4 @@ def get_del_resource_stats_msg(data, results):
         f'Не найдено реусрсов в БД: {len(results["not_found"])}',
         f'\nЧто именно не было найдено:\n {str(results["not_found"])}'
     ]
-    result_text = '\n'.join(addition_info)
-    return result_text
+    return '\n'.join(addition_info)

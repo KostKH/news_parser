@@ -1,8 +1,11 @@
-from models import ItemModel
-from bs4 import BeautifulSoup
-import requests
 import time
+
 import dateparser
+import requests
+from bs4 import BeautifulSoup
+
+from models import ItemModel
+
 
 class ResourceHandler():
 
@@ -48,7 +51,7 @@ class ResourceHandler():
         main_page = self.get_page(resource.resource_url)
         if main_page == '!download_error':
             ResourceHandler.failed_resources.append(resource.resource_url)
-            return
+            return None
         news_list = self.get_elements(main_page, resource.top_tag)
         for news in news_list:
             if 'href' in news.attrs:

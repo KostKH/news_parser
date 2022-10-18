@@ -1,15 +1,17 @@
-from models import ResourceModel
-from parse_handler import ResourceHandler
-from dotenv import load_dotenv
-from arg_handler import parse_arguments
+import json
 import logging
 import os
-import json
-from database import (establish_db_connection, get_parsed_item_added, 
-                      get_resource_list, get_resource_added,
-                      get_resource_deleted)
 import sys
+
+from dotenv import load_dotenv
+
 import messages
+from arg_handler import parse_arguments
+from database import (establish_db_connection, get_parsed_item_added,
+                      get_resource_added, get_resource_deleted,
+                      get_resource_list)
+from models import ResourceModel
+from parse_handler import ResourceHandler
 
 
 def parse_items():
@@ -21,7 +23,7 @@ def parse_items():
     for resource in resource_list:
         items_list = handler(resource)
         all_found_items += items_list
-    
+
     saving_stats = {
         'updated': [],
         'created': [],
@@ -30,12 +32,12 @@ def parse_items():
     for item in all_found_items:
         result = get_parsed_item_added(engine, items_table, item)
         saving_stats[result].append(item)
-    
+
     result_text = messages.get_parse_stats_msg(
         resource_list,
         all_found_items,
         saving_stats,
-        ResourceHandler,
+        handler,
     )
     print(result_text)
     print(
@@ -68,7 +70,7 @@ def add_resources(data):
             serialized_resource
         )
         results[result].append(resource['RESOURCE_NAME'])
-    result_text = messages.get_add_resource_stats_msg(data,results)
+    result_text = messages.get_add_resource_stats_msg(data, results)
     print(result_text)
 
 
@@ -87,8 +89,9 @@ def delete_resources(data):
             int(resource_id)
         )
         results[result].append(resource_id)
-    result_text = messages.get_del_resource_stats_msg(data,results)
+    result_text = messages.get_del_resource_stats_msg(data, results)
     print(result_text)
+
 
 def list_resources():
     """action: --list-resources"""
@@ -106,7 +109,7 @@ def get_data_from_file(input_file):
     except FileNotFoundError as e:
         print(str(e))
         sys.exit(1)
-    except json.decoder.JSONDecodeError as e:
+    except json.decoder.JSONDecodeError:
         print(
             "Error: couldn't retrieve list of resources from file. "
             " Please, ensure your file contains data in recommended format"
@@ -120,14 +123,15 @@ def get_data_from_file(input_file):
         sys.exit(1)
     return data
 
+
 def main():
     load_dotenv()
-    
+
     logfile = os.getenv('LOGFILE')
 
     logging.basicConfig(
         level=logging.ERROR,
-        filename=logfile, 
+        filename=logfile,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     parser, arguments = parse_arguments()
