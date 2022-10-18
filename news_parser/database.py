@@ -15,7 +15,7 @@ def establish_db_connection():
 
     engine = create_engine(
         f'postgresql+psycopg2://{user}:{password}@{host}:{port}/{db_name}',
-        echo=True,
+        echo=False,
         future=True
     )
     metadata_obj = MetaData()

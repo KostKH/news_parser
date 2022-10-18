@@ -20,7 +20,7 @@ news_parser - это новостной парсер.
 
 ## Как запустить проект:
 
-Для запуска проекта на локальной машине в проект вложен docker-compose. После запуска docker-compose сайт будет доступен по адресу: http://127.0.0.1/
+Для запуска проекта на локальной машине в проект вложен docker-compose. Учтите, что БД полностью разворачивается в докере, для неё в docker-compose не задан volume. Поэтому при удалении контейнера удалятся и данные базы.
 
 Необходимо выполнить следующие шаги:
 - Проверить, что свободен порт 5432 (требуется для работы  Postgres)
@@ -29,7 +29,7 @@ news_parser - это новостной парсер.
 
 - Клонировать репозиторий и перейти в папку проекта, где расположен файл docker-compose:
 ```
-git clone https://github.com/KostKH/private_blog.git
+git clone https://github.com/KostKH/news_parser.git
 cd news_parser/infra_parser_dev/
 ```
 
@@ -37,7 +37,7 @@ cd news_parser/infra_parser_dev/
 ```
 touch .env
 ```
-- Заполнить .env файл переменными окружения. Пример:
+- Заполнить .env файл переменными окружения. Пример (пароль указан для примера - поменяйте на свой):
 ```
 echo DB_NAME=postgres >>.env
 echo POSTGRES_USER=postgres >>.env
@@ -56,7 +56,7 @@ docker-compose exec parser bash
 ```
 - Находясь в контейнере, запустить скрипт с одним из доступных параметров:
 ```
-python news_parser.py                       <<< вывод помощи по программе
+python news_parser.py                    <<< вывод помощи по программе
 python news_parser.py  --help            <<< вывод помощи по программе
 python news_parser.py  --parse           <<< парсинг новостей
 python news_parser.py  --add_resources 'examples/add_resorces.json'       <<< загрузка в БД 'resources' сайтов из файла-примера
